@@ -103,11 +103,13 @@ out:
     _exit(EXIT_FAILURE);   /* also detaches from tracee */
 }
 
-
 bool sm_init(void)
 {
-    globals_t *vars = &sm_globals;
+    return sm_init_ctx(&sm_globals);
+}
 
+bool sm_init_ctx(globals_t *vars)
+{
     /* before attaching to target, install signal handler to detach on error */
     if (vars->options.debug == 0) /* in debug mode, let it crash and see the core dump */
     {
@@ -198,36 +200,58 @@ bool sm_init(void)
 
 void sm_cleanup(void)
 {
+    sm_cleanup_ctx(&sm_globals);
+}
+
+void sm_cleanup_ctx(globals_t *vars)
+{
     /* free any allocated memory used */
-    l_destroy(sm_globals.regions);
-    if (sm_globals.commands)
-        sm_free_all_completions(sm_globals.commands);
-    l_destroy(sm_globals.commands);
+    l_destroy(vars->regions);
+    if (vars->commands)
+        sm_free_all_completions(vars->commands);
+    l_destroy(vars->commands);
 
     /* free matches array */
-    if (sm_globals.matches)
-        free(sm_globals.matches);
+    if (vars->matches)
+        free(vars->matches);
 
     /* attempt to detach just in case */
-    sm_detach(sm_globals.target);
+    sm_detach(vars->target);
 }
 
 /* for front-ends */
 void sm_set_backend(void)
 {
-    sm_globals.options.backend = 1;
+    sm_set_backend_ctx(&sm_globals);
 }
+
+/* for front-ends */
+void sm_set_backend_ctx(globals_t *vars)
+{
+    vars->options.backend = 1;
+}
+
 
 void sm_backend_exec_cmd(const char *commandline)
 {
-    sm_execcommand(&sm_globals, commandline);
+    return sm_backend_exec_cmd_ctx(&sm_globals, commandline);
+}
+
+void sm_backend_exec_cmd_ctx(globals_t *vars, const char *commandline)
+{
+    sm_execcommand(vars, commandline);
     fflush(stdout);
     fflush(stderr);
 }
 
 unsigned long sm_get_num_matches(void)
 {
-    return sm_globals.num_matches;
+    return sm_get_num_matches_ctx(&sm_globals);
+}
+
+unsigned long sm_get_num_matches_ctx(globals_t *vars)
+{
+    return vars->num_matches;
 }
 
 const char *sm_get_version(void)
@@ -237,10 +261,19 @@ const char *sm_get_version(void)
 
 double sm_get_scan_progress(void)
 {
-    return sm_globals.scan_progress;
+    return sm_get_scan_progress_ctx(&sm_globals);
+}
+double sm_get_scan_progress_ctx(globals_t *vars)
+{
+    return vars->scan_progress;
 }
 
 void sm_set_stop_flag(bool stop_flag)
 {
-    sm_globals.stop_flag = stop_flag;
+    sm_set_stop_flag_ctx(&sm_globals, stop_flag);
+}
+
+void sm_set_stop_flag_ctx(globals_t *vars, bool stop_flag)
+{
+    vars->stop_flag = stop_flag;
 }

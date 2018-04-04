@@ -73,7 +73,8 @@ typedef struct {
 matches_and_old_values_array *allocate_array (matches_and_old_values_array *array,
                                               size_t max_bytes);
 
-matches_and_old_values_array *null_terminate (matches_and_old_values_array *array,
+matches_and_old_values_array *null_terminate (globals_t *vars, 
+                                              matches_and_old_values_array *array,
                                               matches_and_old_values_swath *swath);
 
 /* for printable text representation */
@@ -90,7 +91,7 @@ match_location nth_match (matches_and_old_values_array *matches, size_t n);
 
 /* deletes matches in [start, end) and resizes the matches array */
 matches_and_old_values_array *
-delete_in_address_range (matches_and_old_values_array *array,
+delete_in_address_range (globals_t *vars, matches_and_old_values_array *array,
                          unsigned long *num_matches,
                          void *start_address, void *end_address);
 
@@ -128,7 +129,8 @@ local_address_beyond_last_element (matches_and_old_values_swath *swath)
 }
 
 static inline matches_and_old_values_array *
-allocate_enough_to_reach (matches_and_old_values_array *array,
+allocate_enough_to_reach (globals_t *vars,
+                          matches_and_old_values_array *array,
                           void *last_byte_to_reach_plus_one,
                           matches_and_old_values_swath **swath_pointer_to_correct)
 {
@@ -146,7 +148,7 @@ allocate_enough_to_reach (matches_and_old_values_array *array,
         while (bytes_to_allocate < bytes_needed)
             bytes_to_allocate *= 2;
 
-        show_debug("to_allocate %ld, max %ld\n", bytes_to_allocate,
+        show_debug(vars, "to_allocate %ld, max %ld\n", bytes_to_allocate,
                    array->max_needed_bytes);
 
         /* sometimes we know an absolute max that we will need */
@@ -176,7 +178,8 @@ allocate_enough_to_reach (matches_and_old_values_array *array,
 /* returns a pointer to the swath to which the element was added -
    i.e. the last swath in the array after the operation */
 static inline matches_and_old_values_swath *
-add_element (matches_and_old_values_array **array,
+add_element (globals_t *vars,
+             matches_and_old_values_array **array,
              matches_and_old_values_swath *swath,
              void *remote_address,
              uint8_t new_byte,
@@ -186,7 +189,7 @@ add_element (matches_and_old_values_array **array,
         assert(swath->first_byte_in_child == NULL);
 
         /* we have to overwrite this as a new swath */
-        *array = allocate_enough_to_reach(*array, (void *)swath +
+        *array = allocate_enough_to_reach(vars, *array, (void *)swath +
             sizeof(matches_and_old_values_swath) +
             sizeof(old_value_and_match_info), &swath);
 
@@ -208,7 +211,7 @@ add_element (matches_and_old_values_array **array,
              * The equal case is decided for a new swath, so that
              * later we don't needlessly iterate through a bunch
              * of empty values */
-            *array = allocate_enough_to_reach(*array,
+            *array = allocate_enough_to_reach(vars, *array,
                 local_address_beyond_last_element(swath) +
                 needed_size_for_a_new_swath, &swath);
 
@@ -219,7 +222,7 @@ add_element (matches_and_old_values_array **array,
         } else {
             /* It is more memory-efficient to write over the intervening
                space with null values */
-            *array = allocate_enough_to_reach(*array,
+            *array = allocate_enough_to_reach(vars, *array,
                 local_address_beyond_last_element(swath) +
                 local_address_excess, &swath);
 

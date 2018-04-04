@@ -33,6 +33,8 @@
 #include <assert.h>
 #include <stdbool.h>
 
+typedef struct globals_t globals_t;
+
 /* some routines for working with value_t structures */
 
 /* match_flags: they MUST be implemented as an `uint16_t`, the `__packed__` ensures so.
@@ -147,7 +149,7 @@ typedef struct {
 
 /* used when outputting values to user */
 /* only works for numbers */
-void valtostr(const value_t *val, char *str, size_t n);
+void valtostr(globals_t *vars, const value_t *val, char *str, size_t n);
 /* parse bytearray, it will allocate the arrays itself, then needs to be free'd by `free_uservalue()` */
 bool parse_uservalue_bytearray(char *const *argv, unsigned argc, uservalue_t *val);
 bool parse_uservalue_number(const char *nptr, uservalue_t * val); /* parse int or float */

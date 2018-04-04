@@ -44,7 +44,7 @@
 
 
 /* global settings */
-typedef struct {
+struct globals_t {
     unsigned exit:1;
     pid_t target;
     matches_and_old_values_array *matches;
@@ -67,7 +67,7 @@ typedef struct {
         unsigned short dump_with_ascii;
         unsigned short reverse_endianness;
     } options;
-} globals_t;
+};
 
 /* global settings */
 extern globals_t sm_globals;
@@ -93,5 +93,28 @@ bool sm_peekdata(const void *addr, uint16_t length, const mem64_t **result_ptr, 
 bool sm_attach(pid_t target);
 bool sm_read_array(pid_t target, const void *addr, void *buf, size_t len);
 bool sm_write_array(pid_t target, void *addr, const void *data, size_t len);
+
+/* ctx API */
+bool sm_init_ctx(globals_t *vars);
+void sm_cleanup_ctx(globals_t *vars);
+void sm_set_backend_ctx(globals_t *vars);
+void sm_backend_exec_cmd_ctx(globals_t *vars, const char *commandline);
+unsigned long sm_get_num_matches_ctx(globals_t *vars);
+double sm_get_scan_progress_ctx(globals_t *vars);
+void sm_set_stop_flag_ctx(globals_t *vars, bool stop_flag);
+
+/* ptrace.c */
+bool sm_detach(pid_t target);
+bool sm_setaddr(pid_t target, void *addr, const value_t *to);
+bool sm_checkmatches(globals_t *vars, scan_match_type_t match_type,
+                     const uservalue_t *uservalue);
+bool sm_searchregions(globals_t *vars, scan_match_type_t match_type,
+                      const uservalue_t *uservalue);
+bool sm_peekdata(const void *addr, uint16_t length, const mem64_t **result_ptr, size_t *memlength);
+bool sm_attach(pid_t target);
+bool sm_read_array(pid_t target, const void *addr, void *buf, size_t len);
+bool sm_write_array(pid_t target, void *addr, const void *data, size_t len);
+
+
 
 #endif /* SCANMEM_H */

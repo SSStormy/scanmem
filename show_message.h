@@ -35,6 +35,8 @@
 #ifndef SHOW_MESSAGE_H
 #define SHOW_MESSAGE_H
 
+typedef struct globals_t globals_t;
+
 /* prepend 'info: ', output to stderr */
 void show_info(const char *fmt, ...);
 /* prepend 'error: ', output to stderr */
@@ -43,9 +45,9 @@ void show_error(const char *fmt, ...);
 void show_warn(const char *fmt, ...);
 
 /* display message only when in debug mode */
-void show_debug(const char *fmt, ...);
+void show_debug(globals_t *vars, const char *fmt, ...);
 
 /* display message only when not running as a backend */
-void show_user(const char *fmt, ...);
+void show_user(globals_t *vars, const char *fmt, ...);
 
 #endif /* SHOW_MESSAGE_H */

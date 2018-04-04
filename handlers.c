@@ -92,7 +92,7 @@
 #endif
 
 /* pager support */
-static FILE *get_pager(FILE *fallback_output)
+static FILE *get_pager(globals_t *vars, FILE *fallback_output)
 {
     const char *pager;
     pid_t pgpid;
@@ -104,7 +104,7 @@ static FILE *get_pager(FILE *fallback_output)
 
     assert(fallback_output != NULL);
 
-    if (sm_globals.options.backend)
+    if (vars->options.backend)
         return fallback_output;
 
     if ((pager = util_getenv("PAGER")) == NULL || *pager == '\0') {
@@ -145,7 +145,7 @@ retry:
         /* NOTREACHED */
     default:
         if (waitpid(pgpid, &pgret, 0) == -1) {
-            show_debug("pager: waitpid() error `%s`\n", strerror(errno));
+            show_debug(vars, "pager: waitpid() error `%s`\n", strerror(errno));
             show_warn("pager: waitpid() error. falling back to normal output\n");
             return fallback_output;
         } else {
@@ -155,7 +155,7 @@ retry:
                 return fallback_output;
             }
             if (pgcmdfail) {
-                show_debug("pager: execvp(pg=%s) ret -> %d (%s)\n", pager, pgret, strerror(pgret));
+                show_debug(vars, "pager: execvp(pg=%s) ret -> %d (%s)\n", pager, pgret, strerror(pgret));
                 if (!strcmp(pager, "more")) {
                     show_warn("pager: sh failed to execute more. falling back to normal output\n");
                     return fallback_output;
@@ -459,10 +459,10 @@ bool handler__list(globals_t *vars, char **argv, unsigned argc)
     if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == -1) {
         if (!vars->options.backend)
             show_warn("handler__list(): couldn't get terminal size.\n");
-        pager = get_pager(stdout);
+        pager = get_pager(vars, stdout);
     } else {
         /* check if the output fits in the terminal window */
-        pager = (w.ws_row >= MIN(max_to_print, vars->num_matches)) ? stdout : get_pager(stdout);
+        pager = (w.ws_row >= MIN(max_to_print, vars->num_matches)) ? stdout : get_pager(vars, stdout);
     }
 
     /* list all known matches */
@@ -509,7 +509,7 @@ bool handler__list(globals_t *vars, char **argv, unsigned argc)
                 ; /* cheat gcc */
                 value_t val = data_to_val(reading_swath_index, reading_iterator);
 
-                valtostr(&val, v, buf_len);
+                valtostr(vars, &val, v, buf_len);
                 break;
             }
 
@@ -752,7 +752,7 @@ bool handler__dregion(globals_t *vars, char **argv, unsigned argc)
 
             void *start_address = reg_to_delete->start;
             void *end_address = reg_to_delete->start + reg_to_delete->size;
-            vars->matches = delete_in_address_range(vars->matches, &vars->num_matches,
+            vars->matches = delete_in_address_range(vars, vars->matches, &vars->num_matches,
                                                     start_address, end_address);
             if (vars->matches == NULL)
             {
@@ -1143,7 +1143,7 @@ bool handler__help(globals_t *vars, char **argv, unsigned argc)
 
     np = commands->head;
 
-    pager = get_pager(stderr);
+    pager = get_pager(vars, stderr);
 
     /* print version information for generic help */
     if (argv[1] == NULL) {
@@ -1199,7 +1199,7 @@ retl:
 
 bool handler__eof(globals_t * vars, char **argv, unsigned argc)
 {
-    show_user("exit\n");
+    show_user(vars, "exit\n");
     return handler__exit(vars, argv, argc);
 }
 
@@ -1315,7 +1315,7 @@ bool handler__watch(globals_t * vars, char **argv, unsigned argc)
 
             memcpy(val.bytes, memory_ptr, memlength);
 
-            valtostr(&val, buf, sizeof(buf));
+            valtostr(vars, &val, buf, sizeof(buf));
 
             /* fetch new timestamp */
             t = time(NULL);
@@ -1343,9 +1343,9 @@ bool handler__show(globals_t * vars, char **argv, unsigned argc)
     }
     
     if (strcmp(argv[1], "copying") == 0)
-        show_user(SM_COPYING);
+        show_user(vars, SM_COPYING);
     else if (strcmp(argv[1], "warranty") == 0)
-        show_user(SM_WARRANTY);
+        show_user(vars, SM_WARRANTY);
     else if (strcmp(argv[1], "version") == 0)
         vars->printversion(stderr);
     else {

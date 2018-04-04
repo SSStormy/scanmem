@@ -32,8 +32,7 @@ void show_info(const char *fmt, ...)
     fprintf(stderr, "info: ");
     vfprintf(stderr, fmt, args);
     va_end (args);
-}
-
+} 
 void show_error(const char *fmt, ...)
 {
     va_list args;
@@ -52,22 +51,22 @@ void show_warn(const char *fmt, ...)
     va_end (args);
 }
 
-void show_user(const char *fmt, ...)
+void show_user(globals_t *vars, const char *fmt, ...)
 {
     va_list args;
     va_start (args, fmt);
-    if (!(sm_globals.options.backend))
+    if (!(vars->options.backend))
     {
         vfprintf(stderr, fmt, args);
     }
     va_end (args);
 }
 
-void show_debug(const char *fmt, ...)
+void show_debug(globals_t *vars, const char *fmt, ...)
 {
     va_list args;
     va_start (args, fmt);
-    if (sm_globals.options.debug)
+    if (vars->options.debug)
     {
         fprintf(stderr, "debug: ");
         vfprintf(stderr, fmt, args);

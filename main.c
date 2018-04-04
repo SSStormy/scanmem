@@ -84,17 +84,17 @@ static void printhelp(void)
 {
     printcopyright(stderr);
 
-    show_user("%s", help_text);
+    show_user(&sm_globals, "%s", help_text);
     return;
 }
 
 static inline void show_user_quick_help(pid_t target)
 {
     if (target == 0) {
-        show_user("Enter the pid of the process to search using the \"pid\" command.\n");
-        show_user("Enter \"help\" for other commands.\n");
+        show_user(&sm_globals, "Enter the pid of the process to search using the \"pid\" command.\n");
+        show_user(&sm_globals, "Enter \"help\" for other commands.\n");
     } else {
-        show_user("Please enter current value, or \"help\" for other commands.\n");
+        show_user(&sm_globals, "Please enter current value, or \"help\" for other commands.\n");
     }
 }
 
@@ -200,9 +200,9 @@ int main(int argc, char **argv)
              line != NULL; line = strtok_r(NULL, sep, &saveptr))
         {
             if (vars->matches) {
-                show_user("%ld> %s\n", vars->num_matches, line);
+                show_user(&sm_globals, "%ld> %s\n", vars->num_matches, line);
             } else {
-                show_user("> %s\n", line);
+                show_user(&sm_globals, "> %s\n", line);
             }
 
             if (sm_execcommand(vars, line) == false) {

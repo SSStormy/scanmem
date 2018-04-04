@@ -50,7 +50,7 @@ allocate_array (matches_and_old_values_array *array, size_t max_bytes)
 }
 
 matches_and_old_values_array *
-null_terminate (matches_and_old_values_array *array,
+null_terminate (globals_t *vars, matches_and_old_values_array *array,
                 matches_and_old_values_swath *swath)
 {
     size_t bytes_needed;
@@ -60,7 +60,7 @@ null_terminate (matches_and_old_values_array *array,
 
     } else {
         swath = local_address_beyond_last_element(swath );
-        array = allocate_enough_to_reach(array, ((void *)swath) +
+        array = allocate_enough_to_reach(vars, array, ((void *)swath) +
                                          sizeof(matches_and_old_values_swath),
                                          &swath);
         swath->first_byte_in_child = NULL;
@@ -155,7 +155,8 @@ nth_match (matches_and_old_values_array *matches, size_t n)
 
 /* deletes matches in [start, end) and resizes the matches array */
 matches_and_old_values_array *
-delete_in_address_range (matches_and_old_values_array *array,
+delete_in_address_range (globals_t *vars, 
+                         matches_and_old_values_array *array,
                          unsigned long *num_matches,
                          void *start_address, void *end_address)
 {
@@ -188,7 +189,7 @@ delete_in_address_range (matches_and_old_values_array *array,
                 (We can get away with assuming that the pointers will stay
                  valid, because as we never add more data to the array than
                  there was before, it will not reallocate.) */
-            writing_swath_index = add_element(&array,
+            writing_swath_index = add_element(vars, &array,
                                       writing_swath_index, address,
                                       old_byte.old_value, old_byte.match_info);
 
@@ -210,5 +211,5 @@ delete_in_address_range (matches_and_old_values_array *array,
         }
     }
 
-    return null_terminate(array, writing_swath_index);
+    return null_terminate(vars, array, writing_swath_index);
 }

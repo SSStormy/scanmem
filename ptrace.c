@@ -411,7 +411,7 @@ bool sm_checkmatches(globals_t *vars,
                - We can get away with assuming that the pointers will stay valid,
                  because as we never add more data to the array than there was before, it will not reallocate. */
 
-            writing_swath_index = add_element(&(vars->matches), writing_swath_index, address,
+            writing_swath_index = add_element(vars, &(vars->matches), writing_swath_index, address,
                                               get_u8b(memory_ptr), checkflags);
 
             ++vars->num_matches;
@@ -420,7 +420,7 @@ bool sm_checkmatches(globals_t *vars,
         }
         else if (required_extra_bytes_to_record)
         {
-            writing_swath_index = add_element(&(vars->matches), writing_swath_index, address,
+            writing_swath_index = add_element(vars, &(vars->matches), writing_swath_index, address,
                                               get_u8b(memory_ptr), flags_empty);
             --required_extra_bytes_to_record;
         }
@@ -459,13 +459,13 @@ bool sm_checkmatches(globals_t *vars,
 
     ENDINTERRUPTABLE();
 
-    if (!(vars->matches = null_terminate(vars->matches, writing_swath_index)))
+    if (!(vars->matches = null_terminate(vars, vars->matches, writing_swath_index)))
     {
         show_error("memory allocation error while reducing matches-array size\n");
         return false;
     }
 
-    show_user("ok\n");
+    show_user(vars, "ok\n");
 
     /* tell front-end we've done */
     vars->scan_progress = MAX_PROGRESS;
@@ -520,7 +520,7 @@ bool sm_searchregions(globals_t *vars, scan_match_type_t match_type, const userv
     
     total_size += sizeof(matches_and_old_values_swath); /* for null terminate */
     
-    show_debug("allocate array, max size %ld\n", total_size);
+    show_debug(vars, "allocate array, max size %ld\n", total_size);
 
     if (!(vars->matches = allocate_array(vars->matches, total_size)))
     {
@@ -563,7 +563,7 @@ bool sm_searchregions(globals_t *vars, scan_match_type_t match_type, const userv
 
         /* print a progress meter so user knows we haven't crashed */
         /* cannot use show_info here because it'll append a '\n' */
-        show_user("%02u/%02u searching %#10lx - %#10lx", ++regnum,
+        show_user(vars, "%02u/%02u searching %#10lx - %#10lx", ++regnum,
                 vars->regions->size, (unsigned long)r->start, (unsigned long)r->start + r->size);
         fflush(stderr);
 
@@ -594,7 +594,7 @@ bool sm_searchregions(globals_t *vars, scan_match_type_t match_type, const userv
             if (UNLIKELY(match_length > 0))
             {
                 assert(match_length <= memlength);
-                writing_swath_index = add_element(&(vars->matches), writing_swath_index, r->start+offset,
+                writing_swath_index = add_element(vars, &(vars->matches), writing_swath_index, r->start+offset,
                                                   get_u8b(memory_ptr), checkflags);
                 
                 ++vars->num_matches;
@@ -603,7 +603,7 @@ bool sm_searchregions(globals_t *vars, scan_match_type_t match_type, const userv
             }
             else if (required_extra_bytes_to_record)
             {
-                writing_swath_index = add_element(&(vars->matches), writing_swath_index, r->start+offset,
+                writing_swath_index = add_element(vars, &(vars->matches), writing_swath_index, r->start+offset,
                                                   get_u8b(memory_ptr), flags_empty);
                 --required_extra_bytes_to_record;
             }
@@ -631,7 +631,7 @@ bool sm_searchregions(globals_t *vars, scan_match_type_t match_type, const userv
             break;
         }
         n = n->next;
-        show_user("ok\n");
+        show_user(vars, "ok\n");
     }
 
     ENDINTERRUPTABLE();
@@ -639,7 +639,7 @@ bool sm_searchregions(globals_t *vars, scan_match_type_t match_type, const userv
     /* tell front-end we've finished */
     vars->scan_progress = MAX_PROGRESS;
     
-    if (!(vars->matches = null_terminate(vars->matches, writing_swath_index)))
+    if (!(vars->matches = null_terminate(vars, vars->matches, writing_swath_index)))
     {
         show_error("memory allocation error while reducing matches-array size\n");
         return false;

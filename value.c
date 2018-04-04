@@ -36,7 +36,7 @@
 #include "value.h"
 #include "show_message.h"
 
-void valtostr(const value_t *val, char *str, size_t n)
+void valtostr(globals_t *vars, const value_t *val, char *str, size_t n)
 {
     char buf[128];
     int np = 0;
@@ -56,7 +56,7 @@ void valtostr(const value_t *val, char *str, size_t n)
          (val->flags & flag_f32b) ? "F32 " : "");
     /* handle having no type at all */
     if (np <= 2) {
-        show_debug("BUG: No type\n");
+        show_debug(vars, "BUG: No type\n");
         goto err;
     }
 
@@ -71,7 +71,7 @@ void valtostr(const value_t *val, char *str, size_t n)
     else if (val->flags & flag_f64b) np = snprintf(str, n, "%lg, %s", get_f64b(val), buf);
     else if (val->flags & flag_f32b) np = snprintf(str, n, "%g, %s", get_f32b(val), buf);
     else {
-        show_debug("BUG: No formatting found\n");
+        show_debug(vars, "BUG: No formatting found\n");
         goto err;
     }
     if (np <= 0 || np >= (n - 1))
