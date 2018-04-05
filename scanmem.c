@@ -232,16 +232,17 @@ void sm_set_backend_ctx(globals_t *vars)
 }
 
 
-void sm_backend_exec_cmd(const char *commandline)
+bool sm_backend_exec_cmd(const char *commandline)
 {
     return sm_backend_exec_cmd_ctx(&sm_globals, commandline);
 }
 
-void sm_backend_exec_cmd_ctx(globals_t *vars, const char *commandline)
+bool sm_backend_exec_cmd_ctx(globals_t *vars, const char *commandline)
 {
-    sm_execcommand(vars, commandline);
+    bool result = sm_execcommand(vars, commandline);
     fflush(stdout);
     fflush(stderr);
+    return result;
 }
 
 unsigned long sm_get_num_matches(void)

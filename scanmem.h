@@ -76,7 +76,7 @@ bool sm_init(void);
 void sm_cleanup(void);
 void sm_printversion(FILE *outfd);
 void sm_set_backend(void);
-void sm_backend_exec_cmd(const char *commandline);
+bool sm_backend_exec_cmd(const char *commandline);
 unsigned long sm_get_num_matches(void);
 const char *sm_get_version(void);
 double sm_get_scan_progress(void);
@@ -97,7 +97,7 @@ bool sm_write_array(pid_t target, void *addr, const void *data, size_t len);
 /* ctx API */
 bool sm_init_ctx(globals_t *vars);
 void sm_cleanup_ctx(globals_t *vars);
-void sm_set_backend_ctx(globals_t *vars);
+bool sm_set_backend_ctx(globals_t *vars);
 void sm_backend_exec_cmd_ctx(globals_t *vars, const char *commandline);
 unsigned long sm_get_num_matches_ctx(globals_t *vars);
 double sm_get_scan_progress_ctx(globals_t *vars);
